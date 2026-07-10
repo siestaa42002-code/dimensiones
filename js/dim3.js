@@ -1,6 +1,10 @@
-/* 3D — El Volumen (Three.js) */
+/* 3D — El Volumen (Three.js) + sombra 2D */
 (function () {
   const canvas = document.getElementById('canvas-3d');
+  const cmp = document.getElementById('compare-3d');
+  const cctx = cmp.getContext('2d');
+  const panel = document.getElementById('panel-3d');
+  let idleTimer = null;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   const scene = new THREE.Scene();
@@ -41,18 +45,39 @@
   );
   scene.add(pts);
 
+  // Vértices y aristas del cubo para calcular su sombra
+  const CV = [];
+  for (let i = 0; i < 8; i++) {
+    CV.push([(i & 1) ? 1.2 : -1.2, (i & 2) ? 1.2 : -1.2, (i & 4) ? 1.2 : -1.2]);
+  }
+  const CE = [];
+  for (let a = 0; a < 8; a++) {
+    for (let d = 0; d < 3; d++) {
+      const b = a ^ (1 << d);
+      if (b > a) CE.push([a, b]);
+    }
+  }
+
   let dragging = false, lastX = 0, lastY = 0;
   let velX = 0.004, velY = 0.002;
+
+  function wake() {
+    panel.classList.add('active');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => panel.classList.remove('active'), 1500);
+  }
 
   canvas.addEventListener('pointerdown', e => {
     dragging = true; lastX = e.clientX; lastY = e.clientY;
     sfx.sweep(0.5);
+    wake();
   });
   window.addEventListener('pointermove', e => {
     if (!dragging) return;
     velY = (e.clientX - lastX) * 0.0012;
     velX = (e.clientY - lastY) * 0.0012;
     lastX = e.clientX; lastY = e.clientY;
+    wake();
   });
   window.addEventListener('pointerup', () => dragging = false);
 
@@ -63,6 +88,40 @@
     renderer.setPixelRatio(dpr);
     camera.aspect = rect.width / rect.height;
     camera.updateProjectionMatrix();
+  }
+
+  // Sombra: rota los vértices igual que el cubo y aplasta la Y (luz cenital)
+  function drawShadow(rxA, ryA) {
+    const { w, h } = fitCanvas(cmp);
+    cctx.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2;
+    const s = Math.min(w, h) * 0.26;
+
+    const cosX = Math.cos(rxA), sinX = Math.sin(rxA);
+    const cosY = Math.cos(ryA), sinY = Math.sin(ryA);
+
+    const flat = CV.map(v => {
+      let [x, y, z] = v;
+      // Rotación X
+      let ny = y * cosX - z * sinX;
+      let nz = y * sinX + z * cosX;
+      y = ny; z = nz;
+      // Rotación Y
+      let nx = x * cosY + z * sinY;
+      nz = -x * sinY + z * cosY;
+      x = nx; z = nz;
+      // Sombra sobre el suelo: se descarta la altura (y)
+      return { x: cx + x * s, y: cy + z * s };
+    });
+
+    cctx.strokeStyle = 'rgba(255,149,0,0.85)';
+    cctx.lineWidth = 1.3;
+    cctx.beginPath();
+    for (const [a, b] of CE) {
+      cctx.moveTo(flat[a].x, flat[a].y);
+      cctx.lineTo(flat[b].x, flat[b].y);
+    }
+    cctx.stroke();
   }
 
   function loop(t) {
@@ -78,6 +137,8 @@
     core.scale.setScalar(1 + Math.sin(t * 0.002) * 0.12);
 
     pts.rotation.y = t * 0.00012;
+
+    drawShadow(group.rotation.x, group.rotation.y);
 
     renderer.render(scene, camera);
     requestAnimationFrame(loop);

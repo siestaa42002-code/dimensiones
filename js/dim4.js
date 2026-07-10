@@ -1,13 +1,23 @@
-/* 4D — El Teseracto */
+/* 4D — El Teseracto + cubo 3D de referencia */
 (function () {
   const canvas = document.getElementById('canvas-4d');
   const ctx = canvas.getContext('2d');
+  const cmp = document.getElementById('compare-4d');
+  const cctx = cmp.getContext('2d');
+  const panel = document.getElementById('panel-4d');
+  let idleTimer = null;
 
   const sXW = document.getElementById('rot-xw');
   const sYW = document.getElementById('rot-yw');
   const sZW = document.getElementById('rot-zw');
 
-  [sXW, sYW, sZW].forEach(s => s.addEventListener('input', () => sfx.chord(s.value / 100)));
+  function wake() {
+    panel.classList.add('active');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => panel.classList.remove('active'), 1500);
+  }
+
+  [sXW, sYW, sZW].forEach(s => s.addEventListener('input', () => { sfx.chord(s.value / 100); wake(); }));
 
   const verts = [];
   for (let i = 0; i < 16; i++) {
@@ -18,6 +28,19 @@
     for (let b = a + 1; b < 16; b++) {
       const diff = a ^ b;
       if ((diff & (diff - 1)) === 0) edges.push([a, b]);
+    }
+  }
+
+  // Cubo 3D de referencia (8 vértices, 12 aristas)
+  const CV = [];
+  for (let i = 0; i < 8; i++) {
+    CV.push([(i & 1) ? 1 : -1, (i & 2) ? 1 : -1, (i & 4) ? 1 : -1]);
+  }
+  const CE = [];
+  for (let a = 0; a < 8; a++) {
+    for (let d = 0; d < 3; d++) {
+      const b = a ^ (1 << d);
+      if (b > a) CE.push([a, b]);
     }
   }
 
@@ -37,6 +60,7 @@
     dragging = true; lastX = e.clientX; lastY = e.clientY;
     canvas.setPointerCapture(e.pointerId);
     sfx.sweep(0.5);
+    wake();
   });
   canvas.addEventListener('pointermove', e => {
     if (!dragging) return;
@@ -44,6 +68,7 @@
     vrx = (e.clientY - lastY) * 0.006;
     ry += vry; rx += vrx;
     lastX = e.clientX; lastY = e.clientY;
+    wake();
   });
   canvas.addEventListener('pointerup', () => dragging = false);
   canvas.addEventListener('pointercancel', () => dragging = false);
@@ -53,6 +78,38 @@
   }
 
   const clamp01 = v => Math.max(0, Math.min(1, v));
+
+  // Panel: cubo 3D con la MISMA rotación de vista (rx, ry)
+  function drawCube() {
+    const { w, h } = fitCanvas(cmp);
+    cctx.clearRect(0, 0, w, h);
+    const cx = w / 2, cy = h / 2;
+    const s = Math.min(w, h) * 0.24;
+
+    const cosRy = Math.cos(ry), sinRy = Math.sin(ry);
+    const cosRx = Math.cos(rx), sinRx = Math.sin(rx);
+
+    const flat = CV.map(v => {
+      let [x, y, z] = v;
+      let tx = x * cosRy - z * sinRy;
+      let tz = x * sinRy + z * cosRy;
+      x = tx; z = tz;
+      let ty = y * cosRx - z * sinRx;
+      tz = y * sinRx + z * cosRx;
+      y = ty; z = tz;
+      const pz = 1 / (4 - z);
+      return { x: cx + x * pz * 4 * s, y: cy + y * pz * 4 * s };
+    });
+
+    cctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    cctx.lineWidth = 1.2;
+    cctx.beginPath();
+    for (const [a, b] of CE) {
+      cctx.moveTo(flat[a].x, flat[a].y);
+      cctx.lineTo(flat[b].x, flat[b].y);
+    }
+    cctx.stroke();
+  }
 
   function loop() {
     const { w, h, dpr } = fitCanvas(canvas);
@@ -101,8 +158,7 @@
       projected.push({
         x: cx + x * pz * D3 * scale,
         y: cy + y * pz * D3 * scale,
-        wNorm: clamp01((v[3] + 1.6) / 3.2),
-        zNorm: clamp01((z + 1.6) / 3.2)
+        wNorm: clamp01((v[3] + 1.6) / 3.2)
       });
     }
 
@@ -132,6 +188,8 @@
       ctx.fill();
     }
     ctx.globalAlpha = 1;
+
+    drawCube();
 
     requestAnimationFrame(loop);
   }
