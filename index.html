@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIMENSIONES — Un viaje perceptivo</title>
+  <meta name="description" content="Experiencia interactiva sobre cómo se percibirían las dimensiones, de 0D a 4D.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-dim="0">
+
+  <!-- Fondo global de partículas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Barra de progreso dimensional -->
+  <nav id="dim-nav">
+    <a href="#dim0" class="dim-dot active" data-label="0D"><span></span></a>
+    <a href="#dim1" class="dim-dot" data-label="1D"><span></span></a>
+    <a href="#dim2" class="dim-dot" data-label="2D"><span></span></a>
+    <a href="#dim3" class="dim-dot" data-label="3D"><span></span></a>
+    <a href="#dim4" class="dim-dot" data-label="4D"><span></span></a>
+  </nav>
+
+  <!-- HERO -->
+  <header id="hero">
+    <h1 class="glitch" data-text="DIMENSIONES">DIMENSIONES</h1>
+    <p class="subtitle">¿Cómo percibiría la realidad un ser atrapado en cada dimensión?</p>
+    <p class="hint">Desliza hacia abajo para colapsar tu percepción</p>
+    <div class="scroll-arrow">↓</div>
+  </header>
+
+  <main>
+
+    <!-- 0D -->
+    <section id="dim0" class="dim-section">
+      <div class="dim-info">
+        <span class="dim-number">0D</span>
+        <h2>El Punto</h2>
+        <p>
+          No hay arriba ni abajo. No hay adentro ni afuera. No hay tiempo que recorrer
+          ni espacio que ocupar. Un ser en 0D <em>es</em> todo su universo:
+          un único punto sin extensión, sin vecinos, sin pasado.
+        </p>
+        <p class="dim-question">Su percepción: la existencia pura, sin nada que percibir.</p>
+      </div>
+      <div class="dim-stage">
+        <canvas id="canvas-0d"></canvas>
+        <p class="stage-hint">Toca el vacío</p>
+      </div>
+    </section>
+
+    <!-- 1D -->
+    <section id="dim1" class="dim-section reverse">
+      <div class="dim-info">
+        <span class="dim-number">1D</span>
+        <h2>La Línea</h2>
+        <p>
+          Adelante o atrás. Nada más. Un ser lineal ve su mundo como un único punto
+          frente a él: no puede rodear a nadie, no puede mirar hacia "los lados"
+          porque los lados no existen. Su vecino de enfrente lo será para siempre.
+        </p>
+        <p class="dim-question">Su percepción: un punto eterno bloqueando el horizonte.</p>
+      </div>
+      <div class="dim-stage">
+        <canvas id="canvas-1d"></canvas>
+        <p class="stage-hint">Arrastra para moverte por la línea</p>
+      </div>
+    </section>
+
+    <!-- 2D -->
+    <section id="dim2" class="dim-section">
+      <div class="dim-info">
+        <span class="dim-number">2D</span>
+        <h2>El Plano</h2>
+        <p>
+          Bienvenido a Planilandia. Aquí los seres son polígonos que se deslizan
+          sobre una superficie infinita. Ven el mundo como una línea de segmentos:
+          jamás podrán ver el "interior" de nada. Si un ser 3D los atravesara,
+          lo percibirían como una forma que aparece de la nada, muta y desaparece.
+        </p>
+        <p class="dim-question">Su percepción: un mundo de siluetas sin volumen.</p>
+      </div>
+      <div class="dim-stage">
+        <canvas id="canvas-2d"></canvas>
+        <p class="stage-hint">Mueve el cursor: eres una esfera 3D cruzando su plano</p>
+      </div>
+    </section>
+
+    <!-- 3D -->
+    <section id="dim3" class="dim-section reverse">
+      <div class="dim-info">
+        <span class="dim-number">3D</span>
+        <h2>El Volumen</h2>
+        <p>
+          Tu casa. Alto, ancho y profundidad. Crees verlo todo, pero tus ojos solo
+          reciben proyecciones 2D que tu cerebro reconstruye. Nunca has visto un
+          cubo completo: solo caras. Para un ser 4D, tu interior está tan expuesto
+          como el interior de un cuadrado lo está para ti.
+        </p>
+        <p class="dim-question">Su percepción: sombras planas interpretadas como profundidad.</p>
+      </div>
+      <div class="dim-stage">
+        <canvas id="canvas-3d"></canvas>
+        <p class="stage-hint">Arrastra para rotar tu realidad</p>
+      </div>
+    </section>
+
+    <!-- 4D -->
+    <section id="dim4" class="dim-section">
+      <div class="dim-info">
+        <span class="dim-number">4D</span>
+        <h2>El Hipervolumen</h2>
+        <p>
+          Un teseracto: el cubo del cubo. Lo que ves aquí no es 4D, es su sombra
+          proyectada en tu pantalla 2D que simula 3D. Cuando rota en el eje W,
+          sus celdas parecen atravesarse a sí mismas. No es un error: es tu cerebro
+          rindiéndose ante una dirección que no puede señalar.
+        </p>
+        <p class="dim-question">Su percepción: te vería completo, por dentro y por fuera, a la vez.</p>
+      </div>
+      <div class="dim-stage">
+        <canvas id="canvas-4d"></canvas>
+        <div class="controls-4d">
+          <label>XW <input type="range" id="rot-xw" min="0" max="100" value="30"></label>
+          <label>YW <input type="range" id="rot-yw" min="0" max="100" value="0"></label>
+          <label>ZW <input type="range" id="rot-zw" min="0" max="100" value="0"></label>
+        </div>
+        <p class="stage-hint">Controla la rotación en los planos de la cuarta dimensión</p>
+      </div>
+    </section>
+
+    <!-- OUTRO -->
+    <footer id="outro">
+      <h2>¿Y la 5D, 6D, 11D?</h2>
+      <p>
+        Cada dimensión nueva convierte la anterior en una simple sombra.
+        Quizá alguien, en algún lugar, nos mira ahora mismo como nosotros
+        miramos un dibujo en papel.
+      </p>
+      <p class="credits">Hecho con Three.js y curiosidad — 2026</p>
+    </footer>
+
+  </main>
+
+  <!-- Three.js por CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Scripts propios -->
+  <script src="js/main.js"></script>
+  <script src="js/dim0.js"></script>
+  <script src="js/dim1.js"></script>
+  <script src="js/dim2.js"></script>
+  <script src="js/dim3.js"></script>
+  <script src="js/dim4.js"></script>
+
+</body>
+</html>
