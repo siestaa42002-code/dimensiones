@@ -4,12 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DIMENSIONES — Un viaje perceptivo</title>
-  <meta name="description" content="Experiencia interactiva sobre cómo se percibirían las dimensiones, de 0D a 4D.">
+  <meta name="description" content="Experiencia interactiva sobre cómo se percibirían las dimensiones, de 0D a nD.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body data-dim="0">
+
+  <div id="sound-controls">
+    <button id="sfx-toggle" aria-label="Efectos de sonido">SFX: OFF</button>
+    <button id="ambient-toggle" aria-label="Sonido ambiente">AMBIENTE: OFF</button>
+  </div>
 
   <!-- Fondo global de partículas -->
   <canvas id="bg-canvas"></canvas>
@@ -21,6 +26,8 @@
     <a href="#dim2" class="dim-dot" data-label="2D"><span></span></a>
     <a href="#dim3" class="dim-dot" data-label="3D"><span></span></a>
     <a href="#dim4" class="dim-dot" data-label="4D"><span></span></a>
+    <a href="#dim5" class="dim-dot" data-label="5D"><span></span></a>
+    <a href="#dimN" class="dim-dot" data-label="nD"><span></span></a>
   </nav>
 
   <!-- HERO -->
@@ -127,33 +134,86 @@
           <label>YW <input type="range" id="rot-yw" min="0" max="100" value="0"></label>
           <label>ZW <input type="range" id="rot-zw" min="0" max="100" value="0"></label>
         </div>
-        <p class="stage-hint">Controla la rotación en los planos de la cuarta dimensión</p>
+        <p class="stage-hint">Controla la velocidad de rotación en los planos de la cuarta dimensión</p>
+      </div>
+    </section>
+
+    <!-- 5D -->
+    <section id="dim5" class="dim-section reverse">
+      <div class="dim-info">
+        <span class="dim-number">5D</span>
+        <h2>El Multiverso</h2>
+        <p>
+          Una forma de imaginar la quinta dimensión: el espacio de las posibilidades.
+          Cada punto en 5D sería un universo 4D completo, ligeramente distinto.
+          Aquí ves varios "ecos" del mismo teseracto coexistiendo: versiones
+          alternativas de un mismo objeto. Desliza la probabilidad y colapsa
+          las alternativas en una sola realidad.
+        </p>
+        <p class="dim-question">Su percepción: todas tus decisiones, visibles a la vez.</p>
+      </div>
+      <div class="dim-stage">
+        <canvas id="canvas-5d"></canvas>
+        <div class="controls-4d">
+          <label>PROBABILIDAD <input type="range" id="prob-5d" min="0" max="100" value="80"></label>
+        </div>
+        <p class="stage-hint">0 = un solo universo · 100 = todas las alternativas</p>
+      </div>
+    </section>
+
+    <!-- nD -->
+    <section id="dimN" class="dim-section">
+      <div class="dim-info">
+        <span class="dim-number">nD</span>
+        <h2>El Abismo</h2>
+        <p>
+          La matemática no se detiene en cuatro. Un hipercubo de n dimensiones
+          tiene 2<sup>n</sup> vértices: 32 en 5D, 64 en 6D, 256 en 8D.
+          Cada dimensión extra duplica la estructura y la conecta consigo misma.
+          Lo que ves es la sombra de la sombra de la sombra... hasta caber
+          en tu pantalla. La teoría de cuerdas propone hasta 11.
+        </p>
+        <p class="dim-question">Su percepción: inimaginable. Literalmente.</p>
+      </div>
+      <div class="dim-stage">
+        <canvas id="canvas-nd"></canvas>
+        <div class="controls-4d">
+          <label>DIMENSIONES: <span id="nd-label">5</span> <input type="range" id="nd-slider" min="4" max="8" value="5"></label>
+        </div>
+        <p class="stage-hint">Arrastra para rotar la proyección · sube el slider si te atreves</p>
       </div>
     </section>
 
     <!-- OUTRO -->
     <footer id="outro">
-      <h2>¿Y la 5D, 6D, 11D?</h2>
+      <h2>¿Y la 9D, 10D, 11D?</h2>
       <p>
         Cada dimensión nueva convierte la anterior en una simple sombra.
         Quizá alguien, en algún lugar, nos mira ahora mismo como nosotros
         miramos un dibujo en papel.
       </p>
-      <p class="credits">Hecho con Three.js y curiosidad — 2026</p>
+      <p class="credits">Hecho con Three.js, GSAP, Lenis y Tone.js — 2026</p>
     </footer>
 
   </main>
 
-  <!-- Three.js por CDN -->
+  <!-- Librerías por CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lenis/1.1.13/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 
   <!-- Scripts propios -->
   <script src="js/main.js"></script>
+  <script src="js/audio.js"></script>
   <script src="js/dim0.js"></script>
   <script src="js/dim1.js"></script>
   <script src="js/dim2.js"></script>
   <script src="js/dim3.js"></script>
   <script src="js/dim4.js"></script>
+  <script src="js/dim5.js"></script>
+  <script src="js/dimN.js"></script>
 
 </body>
 </html>

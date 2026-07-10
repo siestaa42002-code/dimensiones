@@ -4,9 +4,9 @@
   const ctx = canvas.getContext('2d');
 
   const mouse = { x: -9999, y: -9999, inside: false };
-  const SPHERE_R = 55;         // radio de "tu" esfera 3D
+  const SPHERE_R = 55;
+  let prevR = 0;
 
-  // Polígonos habitantes
   const beings = [];
   for (let i = 0; i < 7; i++) {
     beings.push({
@@ -38,19 +38,17 @@
     const col = accent();
     const mx = mouse.x * dpr, my = mouse.y * dpr;
 
-    // Rejilla sutil del plano
     ctx.strokeStyle = 'rgba(255,255,255,0.045)';
     ctx.lineWidth = 1;
     const grid = 40 * dpr;
     for (let x = 0; x < w; x += grid) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
     for (let y = 0; y < h; y += grid) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
 
-    // La intersección de tu esfera con el plano: un círculo que "late"
-    // (como si la esfera subiera y bajara a través del plano)
     let circR = 0;
     if (mouse.inside) {
-      const phase = Math.sin(t * 0.0016);                 // -1..1 = altura de la esfera
+      const phase = Math.sin(t * 0.0016);
       circR = Math.sqrt(Math.max(0, 1 - phase * phase)) * SPHERE_R * dpr;
+      if (circR > 1 && prevR <= 1) sfx.sweep(0.5);   // la esfera emerge
       if (circR > 1) {
         const g = ctx.createRadialGradient(mx, my, 0, mx, my, circR);
         g.addColorStop(0, 'rgba(255,255,255,0.25)');
@@ -62,8 +60,8 @@
         ctx.beginPath(); ctx.arc(mx, my, circR, 0, Math.PI * 2); ctx.stroke();
       }
     }
+    prevR = circR;
 
-    // Habitantes: deambulan, giran y huyen del círculo intruso
     for (const b of beings) {
       b.x += b.vx; b.y += b.vy; b.rot += b.vr;
       if (b.x < 0.05 || b.x > 0.95) b.vx *= -1;
@@ -81,7 +79,6 @@
           b.vy += (dy / d) * f * 0.0006;
         }
       }
-      // Fricción y límite de velocidad
       b.vx = Math.max(-0.003, Math.min(0.003, b.vx * 0.995));
       b.vy = Math.max(-0.003, Math.min(0.003, b.vy * 0.995));
 
@@ -96,7 +93,7 @@
       ctx.fill();
     }
 
-    // --- "Lo que ellos ven": una línea de segmentos (proyección 1D) ---
+    // "Lo que ellos ven"
     const visY = h - 34 * dpr;
     ctx.font = `${10 * dpr}px 'JetBrains Mono', monospace`;
     ctx.fillStyle = 'rgba(255,255,255,0.4)';

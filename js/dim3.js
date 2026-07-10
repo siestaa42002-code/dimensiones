@@ -7,11 +7,9 @@
   const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
   camera.position.z = 6;
 
-  // Grupo principal
   const group = new THREE.Group();
   scene.add(group);
 
-  // Cubo wireframe exterior
   const cubeGeo = new THREE.BoxGeometry(2.4, 2.4, 2.4);
   const edges = new THREE.EdgesGeometry(cubeGeo);
   const wire = new THREE.LineSegments(
@@ -20,14 +18,12 @@
   );
   group.add(wire);
 
-  // Núcleo: icosaedro brillante
   const core = new THREE.Mesh(
     new THREE.IcosahedronGeometry(0.8, 1),
     new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.7 })
   );
   group.add(core);
 
-  // Nube de puntos orbitando (da sensación de profundidad)
   const ptsGeo = new THREE.BufferGeometry();
   const P = 220, pos = new Float32Array(P * 3);
   for (let i = 0; i < P; i++) {
@@ -45,11 +41,13 @@
   );
   scene.add(pts);
 
-  // --- Interacción: arrastre con inercia ---
   let dragging = false, lastX = 0, lastY = 0;
-  let velX = 0.004, velY = 0.002;   // rotación inicial
+  let velX = 0.004, velY = 0.002;
 
-  canvas.addEventListener('pointerdown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+  canvas.addEventListener('pointerdown', e => {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    sfx.sweep(0.5);
+  });
   window.addEventListener('pointermove', e => {
     if (!dragging) return;
     velY = (e.clientX - lastX) * 0.0012;
@@ -73,7 +71,6 @@
     group.rotation.y += velY;
     group.rotation.x += velX;
     if (!dragging) { velX *= 0.985; velY *= 0.985; }
-    // Nunca se detiene del todo
     if (Math.abs(velY) < 0.0015) velY = 0.0015 * Math.sign(velY || 1);
 
     core.rotation.x = t * 0.0007;

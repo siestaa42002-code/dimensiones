@@ -11,6 +11,7 @@
   canvas.addEventListener('pointerdown', () => {
     ripples.push({ r: 0, a: 1 });
     if (ripples.length > 12) ripples.shift();
+    sfx.tap(Math.random());
   });
 
   function loop(t) {
@@ -19,7 +20,6 @@
     const cx = w / 2, cy = h / 2;
     const col = accent();
 
-    // Ondas expansivas
     for (let i = ripples.length - 1; i >= 0; i--) {
       const rp = ripples[i];
       rp.r += 3.5;
@@ -34,7 +34,6 @@
     }
     ctx.globalAlpha = 1;
 
-    // El punto: pulso respiratorio + halo
     const pulse = 5 + Math.sin(t * 0.0022) * 2.5;
     const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, pulse * 9);
     glow.addColorStop(0, col);

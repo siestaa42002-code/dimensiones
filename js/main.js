@@ -1,5 +1,5 @@
 /* ============================================
-   main.js — fondo global, scroll, navegación
+   main.js — Lenis, GSAP, fondo, navegación
    ============================================ */
 
 // Helper global: ajusta un canvas a su tamaño CSS con devicePixelRatio
@@ -15,7 +15,80 @@ window.fitCanvas = function (canvas) {
   return { w, h, dpr };
 };
 
-/* ---------- Fondo: campo de partículas reactivo ---------- */
+/* ---------- Lenis: scroll con inercia ---------- */
+const lenis = new Lenis({ duration: 1.35, smoothWheel: true });
+
+gsap.registerPlugin(ScrollTrigger);
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add(t => lenis.raf(t * 1000));
+gsap.ticker.lagSmoothing(0);
+
+// Los anchors del nav usan Lenis para navegar suave
+document.querySelectorAll('#dim-nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    lenis.scrollTo(a.getAttribute('href'), { duration: 1.6 });
+  });
+});
+
+/* ---------- GSAP: animaciones por sección ---------- */
+document.querySelectorAll('.dim-section').forEach(section => {
+  const info = section.querySelector('.dim-info');
+  const stage = section.querySelector('.dim-stage');
+  const number = section.querySelector('.dim-number');
+
+  gsap.fromTo(info,
+    { opacity: 0, y: 60 },
+    {
+      opacity: 1, y: 0, duration: 1, ease: 'power3.out',
+      scrollTrigger: { trigger: section, start: 'top 65%' }
+    }
+  );
+
+  gsap.fromTo(stage,
+    { opacity: 0, y: 80, scale: 0.94 },
+    {
+      opacity: 1, y: 0, scale: 1, duration: 1.1, delay: 0.12, ease: 'power3.out',
+      scrollTrigger: { trigger: section, start: 'top 65%' }
+    }
+  );
+
+  // El número gigante en parallax mientras cruzas la sección
+  gsap.fromTo(number,
+    { yPercent: 30 },
+    {
+      yPercent: -30, ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top bottom', end: 'bottom top', scrub: true }
+    }
+  );
+});
+
+// Hero: el título se encoge y desvanece al hacer scroll
+gsap.to('#hero', {
+  opacity: 0, scale: 0.92, ease: 'none',
+  scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom 40%', scrub: true }
+});
+
+/* ---------- Paleta mutante y nav activa ---------- */
+(function () {
+  const sections = document.querySelectorAll('.dim-section');
+  const dots = document.querySelectorAll('.dim-dot');
+
+  const activate = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const id = e.target.id;                              // "dim0".."dim5", "dimN"
+      const key = id.replace('dim', '').toLowerCase();     // "0".."5", "n"
+      document.body.dataset.dim = key;
+      dots.forEach(d => d.classList.toggle('active', d.getAttribute('href') === '#' + id));
+      if (window.setAudioDim) window.setAudioDim(key);
+    });
+  }, { threshold: 0.55 });
+
+  sections.forEach(s => activate.observe(s));
+})();
+
+/* ---------- Fondo: partículas reactivas ---------- */
 (function () {
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
@@ -33,11 +106,11 @@ window.fitCanvas = function (canvas) {
     parts.push({
       x: Math.random(),
       y: Math.random(),
-      z: 0.3 + Math.random() * 0.7,          // profundidad
+      z: 0.3 + Math.random() * 0.7,
       vx: (Math.random() - 0.5) * 0.0004,
       vy: (Math.random() - 0.5) * 0.0004,
       r: 0.6 + Math.random() * 1.8,
-      tw: Math.random() * Math.PI * 2         // fase de parpadeo
+      tw: Math.random() * Math.PI * 2
     });
   }
 
@@ -48,7 +121,6 @@ window.fitCanvas = function (canvas) {
     const { w, h, dpr } = fitCanvas(canvas);
     ctx.clearRect(0, 0, w, h);
 
-    // Velocidad de scroll → las partículas "fluyen"
     const sy = window.scrollY;
     scrollVel += (sy - lastScroll) * 0.002;
     scrollVel *= 0.92;
@@ -65,7 +137,6 @@ window.fitCanvas = function (canvas) {
 
       let px = p.x * w, py = p.y * h;
 
-      // Repulsión suave del cursor
       const dx = px - mx, dy = py - my;
       const d2 = dx * dx + dy * dy;
       if (d2 < 22000 * dpr) {
@@ -74,8 +145,7 @@ window.fitCanvas = function (canvas) {
         if (f > 0) { px += (dx / d) * f * 26; py += (dy / d) * f * 26; }
       }
 
-      const alpha = 0.25 + 0.55 * Math.abs(Math.sin(t * 0.001 + p.tw)) * p.z;
-      ctx.globalAlpha = alpha;
+      ctx.globalAlpha = 0.25 + 0.55 * Math.abs(Math.sin(t * 0.001 + p.tw)) * p.z;
       ctx.fillStyle = col;
       ctx.beginPath();
       ctx.arc(px, py, p.r * p.z * dpr, 0, Math.PI * 2);
@@ -85,25 +155,4 @@ window.fitCanvas = function (canvas) {
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
-})();
-
-/* ---------- Observador: secciones visibles + paleta + nav ---------- */
-(function () {
-  const sections = document.querySelectorAll('.dim-section');
-  const dots = document.querySelectorAll('.dim-dot');
-
-  const reveal = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.2 });
-
-  const activate = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      const id = e.target.id;                       // "dim0" ... "dim4"
-      document.body.dataset.dim = id.replace('dim', '');
-      dots.forEach(d => d.classList.toggle('active', d.getAttribute('href') === '#' + id));
-    });
-  }, { threshold: 0.55 });
-
-  sections.forEach(s => { reveal.observe(s); activate.observe(s); });
 })();
